@@ -59,7 +59,6 @@ public class RFIDExample {
 
         ch.addTagListener(new RFIDTagListener() {
 			public void onTag(RFIDTagEvent e) {
-				ch.
 				System.out.println("Tag read: " + e.getTag());
 				if(!lst.containsKey(e.getTag())) {
 					System.out.print("ID: "+e.getTag()+" ez aurkituta, sartu izena: ");
