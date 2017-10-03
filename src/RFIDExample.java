@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 import com.phidget22.*;
 
-import phidgetDenda.Produktua;
+import model.Produktua;
 
 public class RFIDExample {
 
