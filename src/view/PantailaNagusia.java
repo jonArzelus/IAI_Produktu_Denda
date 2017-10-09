@@ -30,6 +30,8 @@ import model.Produktua;
 import model.Saltzailea;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class PantailaNagusia {
 
@@ -69,6 +71,7 @@ public class PantailaNagusia {
 	private HashMap<String, Saltzailea> saltzaileZerrenda = new HashMap<String, Saltzailea>();
 	private HashMap<String, Eroslea> erosleZerrenda = new HashMap<String, Eroslea>();
 	private HashMap<String, Produktua> produktuZerrenda = new HashMap<String, Produktua>();
+	DefaultTableModel dtm;
 	
 	//saioaren datuak
 	private Saltzailea saioSaltzailea;
@@ -79,7 +82,16 @@ public class PantailaNagusia {
 	public PantailaNagusia() {
 		initialize();
 		saltzaileZerrenda.put("Giltzak1", new Saltzailea("Giltzak1", "Jon Arzelus Rodriguez", "Saltzaile Arrunta", "1234"));
-		saltzaileZerrenda.put("Giltzak2", new Saltzailea("Giltzak2", "Julen Diez Diez", "Saltzaile Arrunta", "1234"));
+		saltzaileZerrenda.put("Giltzak2", new Saltzailea("Giltzak2", "Julen Diez Martin", "Saltzaile Arrunta", "1234"));
+		//produktu zerrenda
+		produktuZerrenda.put("0a00ec5ce2", new Produktua("0a00ec5ce2","Botoi Beltza",10.0));
+		produktuZerrenda.put("4d004a650f", new Produktua("4d004a650f","Baldosa Berdea",10.0));
+		produktuZerrenda.put("4d004b17c3", new Produktua("4d004b17c3","Txakurrarentzako Kolgantea",10.0));
+		produktuZerrenda.put("0f000a7398", new Produktua("0f000a7398","Diska Zuria - Txikia",10.0));
+		produktuZerrenda.put("4300d02f4a", new Produktua("4300d02f4a","Iltze Beltza",10.0));
+		produktuZerrenda.put("0f0001b130", new Produktua("0f0001b130","Diska Zuria - Handia",10.0));
+		produktuZerrenda.put("4800eef486", new Produktua("4800eef486","Txorien Kontrolerako Aparatua",10.0));
+		produktuZerrenda.put("3f0060b6b6", new Produktua("3f0060b6b6","Roska Tapoi Beltza",10.0));
 		saioSaltzailea=null;
 		try {
 			ch = new RFID();
@@ -131,6 +143,17 @@ public class PantailaNagusia {
 		frmPhidgetDenda.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if(tabbedPane.getSelectedIndex()==2) {
+					for(String k: produktuZerrenda.keySet()) {
+						Produktua temp = produktuZerrenda.get(k);
+						dtm.addRow(new Object[] {temp.getId(),temp.getIzena(),temp.getKopurua(),temp.getPrezioa()});
+					}
+				}
+			}
+		});
+		tabbedPane.setEnabled(false);
 		frmPhidgetDenda.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		
 		panelAdmin = new JPanel();
@@ -239,12 +262,10 @@ public class PantailaNagusia {
 		
 		panelDenda = new JPanel();
 		tabbedPane.addTab("Denda", null, panelDenda, null);
-		tabbedPane.setEnabledAt(1, false);
 		panelDenda.setLayout(null);
 		
 		panelInbentarioa = new JPanel();
 		tabbedPane.addTab("Inbentarioa", null, panelInbentarioa, null);
-		tabbedPane.setEnabledAt(2, false);
 		panelInbentarioa.setLayout(null);
 		
 		JLabel lblDendako = new JLabel("Dendako Inbentarioa");
@@ -253,7 +274,7 @@ public class PantailaNagusia {
 		panelInbentarioa.add(lblDendako);
 		
 		tblInbentarioa = new JTable();
-		tblInbentarioa.setModel(new DefaultTableModel(
+		/*tblInbentarioa.setModel(new DefaultTableModel(
 			new Object[][] {
 				{null, null, null, null},
 				{null, null, null, null},
@@ -278,8 +299,13 @@ public class PantailaNagusia {
 			public Class getColumnClass(int columnIndex) {
 				return columnTypes[columnIndex];
 			}
-		});
-		tblInbentarioa.setBounds(20, 54, 444, 192);
+		});*/
+		//taularen ediziorako
+		dtm = new DefaultTableModel(0,0);
+		String header[] = new String[] {"ID", "Izena", "Kopurua", "Prezioa"};
+		dtm.setColumnIdentifiers(header);
+		tblInbentarioa.setModel(dtm);
+		tblInbentarioa.setBounds(20, 54, 444, 225);
 		panelInbentarioa.add(tblInbentarioa);
 		
 		JLabel lblNewLabel_1 = new JLabel("ID");
@@ -369,6 +395,9 @@ public class PantailaNagusia {
 		lblAdminEr1.setText("");
 		lblAdminEr2.setText("");
 		btnAdminAmaitu.setEnabled(true);
+		tabbedPane.setEnabled(true);
+		//panelDenda.setEnabled(true);
+		//panelInbentarioa.setEnabled(true);
 	}
 	
 	public void saioaAmaitu() {
@@ -386,5 +415,8 @@ public class PantailaNagusia {
 		lblAdminEr1.setText("");
 		lblAdminEr2.setText("");
 		btnAdminAmaitu.setEnabled(false);
+		tabbedPane.setEnabled(false);
+		//panelDenda.setEnabled(false);
+		//panelInbentarioa.setEnabled(false);
 	}
 }

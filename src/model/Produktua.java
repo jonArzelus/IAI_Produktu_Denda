@@ -4,6 +4,7 @@ public class Produktua {
 	
 	String id, izena;
 	double prezioa;
+	int kopurua;
 	
 	public Produktua(String ident, String izen, double prez) {
 		id=ident;
@@ -11,6 +12,48 @@ public class Produktua {
 		prezioa=prez;
 	}
 	
+	public String getIzena() {
+		return izena;
+	}
+
+
+
+	public void setIzena(String izena) {
+		this.izena = izena;
+	}
+
+
+
+	public double getPrezioa() {
+		return prezioa;
+	}
+
+
+
+	public void setPrezioa(double prezioa) {
+		this.prezioa = prezioa;
+	}
+
+
+
+	public int getKopurua() {
+		return kopurua;
+	}
+
+
+
+	public void setKopurua(int kopurua) {
+		this.kopurua = kopurua;
+	}
+
+
+
+	public String getId() {
+		return id;
+	}
+
+
+
 	@Override
 	public String toString() {
 		return ("ID: "+id+",Izena: "+izena+", Prezioa: "+prezioa+"€");
