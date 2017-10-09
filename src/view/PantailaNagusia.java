@@ -32,6 +32,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import javax.swing.ListSelectionModel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class PantailaNagusia {
 
@@ -42,6 +47,7 @@ public class PantailaNagusia {
 	private JTextField txtInbIzena;
 	private JTextField txtInbKopurua;
 	private JTextField txtInbBalioa;
+	private JTextField txtInbId;
 	
 	//bestelako konponenteak
 	JLabel lblAdminIzena;
@@ -52,14 +58,12 @@ public class PantailaNagusia {
 	JLabel lblAdminEr1;
 	JLabel lblAdminEr2;
 	JLabel lblAdminId;
-	JLabel lblInbEr;
+	JLabel lblInbInfo;
 	
 	JButton btnAdminAmaitu;
 	JButton btnAdminHasi;
 	JButton btnInbEzabatu;
-	JButton btnInbIzena;
 	JButton btnInbBalioa;
-	JButton btnInbKopurua;
 	
 	//panelak
 	JTabbedPane tabbedPane;
@@ -72,6 +76,7 @@ public class PantailaNagusia {
 	private HashMap<String, Eroslea> erosleZerrenda = new HashMap<String, Eroslea>();
 	private HashMap<String, Produktua> produktuZerrenda = new HashMap<String, Produktua>();
 	DefaultTableModel dtm;
+	String header[] = new String[] {"ID", "Izena", "Kopurua", "Prezioa"};
 	
 	//saioaren datuak
 	private Saltzailea saioSaltzailea;
@@ -97,7 +102,7 @@ public class PantailaNagusia {
 			ch = new RFID();
 			ch.addTagListener(new RFIDTagListener() {
 				public void onTag(RFIDTagEvent e) {
-					if(tabbedPane.getSelectedIndex()==0) {
+					if(tabbedPane.getSelectedIndex()==0) { //administrazio panela
 						if(saioSaltzailea==null) {
 							System.out.println("Tag read: " + e.getTag());
 							txtAdminErab.setText(e.getTag());
@@ -105,12 +110,18 @@ public class PantailaNagusia {
 							btnAdminHasi.setEnabled(true);
 							lblAdminInfo.setText("Giltza detektatuta, mesedez, sartu pasahitza saioa hasteko");
 						}
+					} else if(tabbedPane.getSelectedIndex()==2) { //inbentario panela
+						if(produktuZerrenda.get(e.getTag())==null) {
+							lblInbInfo.setText("ID: "+e.getTag()+" detektatuta, inbentarioan gehitzeko osatu datuak eta sakatu \"Produktua Gehitu\" botoia");
+						} else {
+							lblInbInfo.setText("ID: "+e.getTag()+" detektatuta, inbentarioan gehituta dagoeneko ("+produktuZerrenda.get(e.getTag()).getIzena()+")");
+						}
 					}
 				}
 	        });
 			ch.addTagLostListener(new RFIDTagLostListener() {
 				public void onTagLost(RFIDTagLostEvent e) {
-					if(tabbedPane.getSelectedIndex()==0) {
+					if(tabbedPane.getSelectedIndex()==0) { //administrazio panela
 						if(saioSaltzailea==null) {
 							System.out.println("Tag lost: " + e.getTag());
 							txtAdminErab.setText("");
@@ -121,6 +132,8 @@ public class PantailaNagusia {
 							btnAdminHasi.setEnabled(false);
 							lblAdminInfo.setText("Giltza detekzioa galduta. Mesedez, urbildu identifikazio giltza saioa hasteko");
 						}
+					} else if(tabbedPane.getSelectedIndex()==2) { //inbentario panela
+						//lblInbInfo.setText("ID: "+e.getTag()+" galduta");
 					}
 				}
 	        });
@@ -145,11 +158,21 @@ public class PantailaNagusia {
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				if(tabbedPane.getSelectedIndex()==2) {
-					for(String k: produktuZerrenda.keySet()) {
-						Produktua temp = produktuZerrenda.get(k);
-						dtm.addRow(new Object[] {temp.getId(),temp.getIzena(),temp.getKopurua(),temp.getPrezioa()});
+				try {
+					if(tabbedPane.getSelectedIndex()==2) {
+						for(String k: produktuZerrenda.keySet()) {
+							Produktua temp = produktuZerrenda.get(k);
+							dtm.addRow(new Object[] {temp.getId(),temp.getIzena(),temp.getKopurua(),temp.getPrezioa()});
+						}
+					} else {
+						while(dtm.getRowCount()>0)
+							dtm.removeRow(0);
+						lblInbInfo.setText("Produktu berriak gehitzeko hurbildu produktua detektorera");
+						btnInbBalioa.setEnabled(false);
+						btnInbEzabatu.setEnabled(false);
 					}
+				} catch(Exception ex) {//taula hasieratzean errorea ekiditeko
+					//ex.printStackTrace();
 				}
 			}
 		});
@@ -274,6 +297,25 @@ public class PantailaNagusia {
 		panelInbentarioa.add(lblDendako);
 		
 		tblInbentarioa = new JTable();
+		tblInbentarioa.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				int row = tblInbentarioa.getSelectedRow();
+				if(row!=-1) {
+					//ID 
+					txtInbId.setText(tblInbentarioa.getModel().getValueAt(row, 0).toString());
+					txtInbIzena.setText(tblInbentarioa.getModel().getValueAt(row, 1).toString());
+					txtInbKopurua.setText(tblInbentarioa.getModel().getValueAt(row, 2).toString());
+					txtInbBalioa.setText(tblInbentarioa.getModel().getValueAt(row, 3).toString());
+					btnInbBalioa.setEnabled(true);
+					btnInbEzabatu.setEnabled(true);
+				}
+			}
+		});
+		tblInbentarioa.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tblInbentarioa.setShowGrid(false);
+		tblInbentarioa.setShowHorizontalLines(false);
+
 		/*tblInbentarioa.setModel(new DefaultTableModel(
 			new Object[][] {
 				{null, null, null, null},
@@ -302,10 +344,9 @@ public class PantailaNagusia {
 		});*/
 		//taularen ediziorako
 		dtm = new DefaultTableModel(0,0);
-		String header[] = new String[] {"ID", "Izena", "Kopurua", "Prezioa"};
 		dtm.setColumnIdentifiers(header);
 		tblInbentarioa.setModel(dtm);
-		tblInbentarioa.setBounds(20, 54, 444, 225);
+		tblInbentarioa.setBounds(20, 54, 444, 212);
 		panelInbentarioa.add(tblInbentarioa);
 		
 		JLabel lblNewLabel_1 = new JLabel("ID");
@@ -328,35 +369,32 @@ public class PantailaNagusia {
 		lblKopurua.setBounds(244, 36, 111, 14);
 		panelInbentarioa.add(lblKopurua);
 		
-		btnInbEzabatu = new JButton("Ezabatu");
-		btnInbEzabatu.setBounds(474, 256, 180, 23);
+		btnInbEzabatu = new JButton("Ezabatu Produktua");
+		btnInbEzabatu.setEnabled(false);
+		btnInbEzabatu.setBounds(474, 209, 180, 23);
 		panelInbentarioa.add(btnInbEzabatu);
 		
 		txtInbIzena = new JTextField();
-		txtInbIzena.setBounds(474, 61, 180, 20);
+		txtInbIzena.setToolTipText("Izena");
+		txtInbIzena.setBounds(474, 82, 180, 20);
 		panelInbentarioa.add(txtInbIzena);
 		txtInbIzena.setColumns(10);
 		
-		btnInbIzena = new JButton("Izena Aldatu");
-		btnInbIzena.setBounds(474, 92, 180, 23);
-		panelInbentarioa.add(btnInbIzena);
-		
 		txtInbKopurua = new JTextField();
-		txtInbKopurua.setBounds(474, 126, 180, 20);
+		txtInbKopurua.setToolTipText("Kopurua");
+		txtInbKopurua.setBounds(474, 113, 180, 20);
 		panelInbentarioa.add(txtInbKopurua);
 		txtInbKopurua.setColumns(10);
 		
-		btnInbKopurua = new JButton("Kopurua Aldatu");
-		btnInbKopurua.setBounds(474, 157, 180, 23);
-		panelInbentarioa.add(btnInbKopurua);
-		
 		txtInbBalioa = new JTextField();
-		txtInbBalioa.setBounds(474, 191, 180, 20);
+		txtInbBalioa.setToolTipText("Balioa");
+		txtInbBalioa.setBounds(474, 144, 180, 20);
 		panelInbentarioa.add(txtInbBalioa);
 		txtInbBalioa.setColumns(10);
 		
-		btnInbBalioa = new JButton("Balioa Aldatu");
-		btnInbBalioa.setBounds(474, 222, 180, 23);
+		btnInbBalioa = new JButton("Balioa(k) Aldatu");
+		btnInbBalioa.setEnabled(false);
+		btnInbBalioa.setBounds(474, 175, 180, 23);
 		panelInbentarioa.add(btnInbBalioa);
 		
 		JLabel lblNewLabel_3 = new JLabel("Konfigurazioa");
@@ -364,10 +402,22 @@ public class PantailaNagusia {
 		lblNewLabel_3.setBounds(475, 36, 179, 14);
 		panelInbentarioa.add(lblNewLabel_3);
 		
-		lblInbEr = new JLabel("errore mezua");
-		lblInbEr.setForeground(Color.RED);
-		lblInbEr.setBounds(10, 303, 644, 14);
-		panelInbentarioa.add(lblInbEr);
+		lblInbInfo = new JLabel("Produktu berriak gehitzeko hurbildu produktua detektorera");
+		lblInbInfo.setForeground(Color.BLUE);
+		lblInbInfo.setBounds(10, 303, 644, 14);
+		panelInbentarioa.add(lblInbInfo);
+		
+		txtInbId = new JTextField();
+		txtInbId.setToolTipText("ID");
+		txtInbId.setEditable(false);
+		txtInbId.setColumns(10);
+		txtInbId.setBounds(474, 54, 180, 20);
+		panelInbentarioa.add(txtInbId);
+		
+		JButton btnInbGehitu = new JButton("Produktua Gehitu");
+		btnInbGehitu.setEnabled(false);
+		btnInbGehitu.setBounds(474, 243, 180, 23);
+		panelInbentarioa.add(btnInbGehitu);
 	}
 	
 	public void setVisible(boolean b) {
