@@ -79,7 +79,7 @@ public class PantailaNagusia {
 	public PantailaNagusia() {
 		initialize();
 		saltzaileZerrenda.put("Giltzak1", new Saltzailea("Giltzak1", "Jon Arzelus Rodriguez", "Saltzaile Arrunta", "1234"));
-		saltzaileZerrenda.put("Giltzak2", new Saltzailea("Giltzak2", "Julen Diez Diez", "Saltzaile Arrunta", "1234"));
+		saltzaileZerrenda.put("Giltzak2", new Saltzailea("Giltzak2", "Julen Diez Martin", "Saltzaile Arrunta", "1234"));
 		saioSaltzailea=null;
 		try {
 			ch = new RFID();
