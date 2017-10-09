@@ -9,6 +9,7 @@ import javax.swing.JButton;
 import java.awt.Panel;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Random;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -64,6 +65,7 @@ public class PantailaNagusia {
 	JButton btnAdminHasi;
 	JButton btnInbEzabatu;
 	JButton btnInbBalioa;
+	JButton btnInbGehitu;
 	
 	//panelak
 	JTabbedPane tabbedPane;
@@ -113,8 +115,25 @@ public class PantailaNagusia {
 					} else if(tabbedPane.getSelectedIndex()==2) { //inbentario panela
 						if(produktuZerrenda.get(e.getTag())==null) {
 							lblInbInfo.setText("ID: "+e.getTag()+" detektatuta, inbentarioan gehitzeko osatu datuak eta sakatu \"Produktua Gehitu\" botoia");
+							tblInbentarioa.clearSelection();
+							txtInbIzena.setText("");
+							txtInbKopurua.setText("");
+							txtInbBalioa.setText("");
+							txtInbId.setText(e.getTag());
+							btnInbEzabatu.setEnabled(false);
+							btnInbBalioa.setEnabled(false);
+							btnInbGehitu.setEnabled(true);
 						} else {
 							lblInbInfo.setText("ID: "+e.getTag()+" detektatuta, inbentarioan gehituta dagoeneko ("+produktuZerrenda.get(e.getTag()).getIzena()+")");
+							int i = 0;
+							while(!tblInbentarioa.getValueAt(i, 0).toString().equals(e.getTag())) {
+								i++;
+								System.out.println(tblInbentarioa.getValueAt(i, 0));
+							}
+							tblInbentarioa.changeSelection(i, 0, false, false);
+							btnInbEzabatu.setEnabled(true);
+							btnInbBalioa.setEnabled(true);
+							btnInbGehitu.setEnabled(false);
 						}
 					}
 				}
@@ -133,7 +152,11 @@ public class PantailaNagusia {
 							lblAdminInfo.setText("Giltza detekzioa galduta. Mesedez, urbildu identifikazio giltza saioa hasteko");
 						}
 					} else if(tabbedPane.getSelectedIndex()==2) { //inbentario panela
-						//lblInbInfo.setText("ID: "+e.getTag()+" galduta");
+						if(produktuZerrenda.get(e.getTag())==null) {
+							lblInbInfo.setText("ID: "+e.getTag()+" detektoretik aldendua. Inbentarioan gehitzeko osatu datuak eta sakatu \"Produktua Gehitu\" botoia");
+						} else {
+							lblInbInfo.setText("Produktu berriak gehitzeko hurbildu produktua detektorera");
+						}
 					}
 				}
 	        });
@@ -143,6 +166,16 @@ public class PantailaNagusia {
 		} catch(PhidgetException ex) {
 			ex.printStackTrace();
 		}
+		
+		//saioa hasteko
+		Random r = new Random();
+		if(r.nextBoolean())
+			txtAdminErab.setText("Giltzak1");
+		else
+			txtAdminErab.setText("Giltzak2");
+		pwdAdminPwd.setText("1234");
+		btnAdminHasi.setEnabled(true);
+		btnAdminHasi.doClick();
 	}
 
 	/**
@@ -168,6 +201,10 @@ public class PantailaNagusia {
 						while(dtm.getRowCount()>0)
 							dtm.removeRow(0);
 						lblInbInfo.setText("Produktu berriak gehitzeko hurbildu produktua detektorera");
+						txtInbId.setText("");
+						txtInbIzena.setText("");
+						txtInbKopurua.setText("");
+						txtInbBalioa.setText("");
 						btnInbBalioa.setEnabled(false);
 						btnInbEzabatu.setEnabled(false);
 					}
@@ -302,13 +339,13 @@ public class PantailaNagusia {
 			public void mouseClicked(MouseEvent arg0) {
 				int row = tblInbentarioa.getSelectedRow();
 				if(row!=-1) {
-					//ID 
 					txtInbId.setText(tblInbentarioa.getModel().getValueAt(row, 0).toString());
 					txtInbIzena.setText(tblInbentarioa.getModel().getValueAt(row, 1).toString());
 					txtInbKopurua.setText(tblInbentarioa.getModel().getValueAt(row, 2).toString());
 					txtInbBalioa.setText(tblInbentarioa.getModel().getValueAt(row, 3).toString());
 					btnInbBalioa.setEnabled(true);
 					btnInbEzabatu.setEnabled(true);
+					btnInbGehitu.setEnabled(false);
 				}
 			}
 		});
@@ -347,6 +384,7 @@ public class PantailaNagusia {
 		dtm.setColumnIdentifiers(header);
 		tblInbentarioa.setModel(dtm);
 		tblInbentarioa.setBounds(20, 54, 444, 212);
+		tblInbentarioa.setDefaultEditor(Object.class, null);
 		panelInbentarioa.add(tblInbentarioa);
 		
 		JLabel lblNewLabel_1 = new JLabel("ID");
@@ -370,6 +408,18 @@ public class PantailaNagusia {
 		panelInbentarioa.add(lblKopurua);
 		
 		btnInbEzabatu = new JButton("Ezabatu Produktua");
+		btnInbEzabatu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					produktuZerrenda.remove(tblInbentarioa.getModel().getValueAt(tblInbentarioa.getSelectedRow(), 0).toString());
+					tabbedPane.setSelectedIndex(-1);
+					tabbedPane.setSelectedIndex(2);
+					lblInbInfo.setText("Produktua modu egokian ezabatu da");
+				} catch(Exception ex) {
+					lblInbInfo.setText("Ezin izan da produktua ezabatu. Mesedez, kontaktatu administrariarekin eta eman 0xheh211221h errore kodea ;)");
+				}
+			}
+		});
 		btnInbEzabatu.setEnabled(false);
 		btnInbEzabatu.setBounds(474, 209, 180, 23);
 		panelInbentarioa.add(btnInbEzabatu);
@@ -393,6 +443,18 @@ public class PantailaNagusia {
 		txtInbBalioa.setColumns(10);
 		
 		btnInbBalioa = new JButton("Balioa(k) Aldatu");
+		btnInbBalioa.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					produktuZerrenda.replace(txtInbId.getText(),produktuZerrenda.get(txtInbId.getText()), new Produktua(txtInbId.getText(),txtInbIzena.getText(),Integer.parseInt(txtInbKopurua.getText()),Double.parseDouble(txtInbBalioa.getText())));
+					tabbedPane.setSelectedIndex(-1);
+					tabbedPane.setSelectedIndex(2);
+					lblInbInfo.setText("Produktua modu egokian eguneratu da");
+				} catch(Exception ex) {
+					lblInbInfo.setText("Sartutako balioak ez dira egokiak eta ezin izan da produktua eguneratu. Mesedez, saiatu berriro");
+				}
+			}
+		});
 		btnInbBalioa.setEnabled(false);
 		btnInbBalioa.setBounds(474, 175, 180, 23);
 		panelInbentarioa.add(btnInbBalioa);
@@ -414,7 +476,19 @@ public class PantailaNagusia {
 		txtInbId.setBounds(474, 54, 180, 20);
 		panelInbentarioa.add(txtInbId);
 		
-		JButton btnInbGehitu = new JButton("Produktua Gehitu");
+		btnInbGehitu = new JButton("Produktua Gehitu");
+		btnInbGehitu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					produktuZerrenda.put(txtInbId.getText(),new Produktua(txtInbId.getText(),txtInbIzena.getText(),Integer.parseInt(txtInbKopurua.getText()),Double.parseDouble(txtInbBalioa.getText())));
+					tabbedPane.setSelectedIndex(-1);
+					tabbedPane.setSelectedIndex(2);
+					lblInbInfo.setText("Produktua modu egokian gehitu da inbentariora");
+				} catch(Exception ex) {
+					lblInbInfo.setText("Sartutako balioak ez dira egokiak eta ezin izan da produktua inbentarioan gehitu. Mesedez, saiatu berriro");
+				}
+			}
+		});
 		btnInbGehitu.setEnabled(false);
 		btnInbGehitu.setBounds(474, 243, 180, 23);
 		panelInbentarioa.add(btnInbGehitu);

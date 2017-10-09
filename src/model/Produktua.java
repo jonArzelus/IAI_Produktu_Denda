@@ -12,6 +12,13 @@ public class Produktua {
 		prezioa=prez;
 	}
 	
+	public Produktua(String ident, String izen, int kop, double prez) {
+		id=ident;
+		izena=izen;
+		kopurua=kop;
+		prezioa=prez;
+	}
+	
 	public String getIzena() {
 		return izena;
 	}
