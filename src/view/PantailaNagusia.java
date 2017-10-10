@@ -5,6 +5,7 @@ import javax.swing.JToolBar;
 import java.awt.BorderLayout;
 import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.Panel;
 import java.time.LocalDateTime;
@@ -88,8 +89,8 @@ public class PantailaNagusia {
 
 	public PantailaNagusia() {
 		initialize();
-		saltzaileZerrenda.put("Giltzak1", new Saltzailea("Giltzak1", "Jon Arzelus Rodriguez", "Saltzaile Arrunta", "1234"));
-		saltzaileZerrenda.put("Giltzak2", new Saltzailea("Giltzak2", "Julen Diez Martin", "Saltzaile Arrunta", "1234"));
+		saltzaileZerrenda.put("Giltzak1", new Saltzailea("Giltzak1", "Jon Arzelus Rodriguez", "Saltzaile Arrunta", "1234", "Saltzaile1.png"));
+		saltzaileZerrenda.put("Giltzak2", new Saltzailea("Giltzak2", "Julen Diez Martin", "Saltzaile Arrunta", "1234", "Saltzaile2.png"));
 		//produktu zerrenda
 		produktuZerrenda.put("0a00ec5ce2", new Produktua("0a00ec5ce2","Botoi Beltza",10.0));
 		produktuZerrenda.put("4d004a650f", new Produktua("4d004a650f","Baldosa Berdea",10.0));
@@ -236,6 +237,7 @@ public class PantailaNagusia {
 		panelAdmin.add(lblAdminIzena);
 		
 		lblAdminArgazkia = new JLabel("");
+		lblAdminArgazkia.setVerticalAlignment(SwingConstants.TOP);
 		lblAdminArgazkia.setHorizontalAlignment(SwingConstants.CENTER);
 		lblAdminArgazkia.setBounds(359, 36, 267, 169);
 		panelAdmin.add(lblAdminArgazkia);
@@ -504,6 +506,8 @@ public class PantailaNagusia {
 	
 	public void saioaHasi() {
 		saioSaltzailea = saltzaileZerrenda.get(txtAdminErab.getText());
+		ImageIcon ii = new ImageIcon(this.getClass().getResource(saioSaltzailea.getIrudia())); //pistaren irudia label batean jarri, fondo modura
+		lblAdminArgazkia.setIcon(ii);
 		lblAdminId.setText(saioSaltzailea.getId());
 		lblAdminIzena.setText(saioSaltzailea.getIzena());
 		lblAdminMota.setText(saioSaltzailea.getMota());
@@ -526,6 +530,7 @@ public class PantailaNagusia {
 	
 	public void saioaAmaitu() {
 		saioSaltzailea = null;
+		lblAdminArgazkia.setIcon(null);
 		lblAdminId.setText("");
 		lblAdminIzena.setText("");
 		lblAdminMota.setText("");

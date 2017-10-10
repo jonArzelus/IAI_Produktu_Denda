@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class Saltzailea {
 	
-	String id, izena, mota, pasahitza;
+	String id, izena, mota, pasahitza, irudia;
 	LocalDateTime azkenSarrera;
 	
 	public Saltzailea(String id, String izena, String mota, String pasahitza) {
@@ -12,6 +12,16 @@ public class Saltzailea {
 		this.izena=izena;
 		this.mota=mota;
 		this.pasahitza=pasahitza;
+		this.irudia=null;
+		this.azkenSarrera=null;
+	}
+	
+	public Saltzailea(String id, String izena, String mota, String pasahitza, String irudia) {
+		this.id=id;
+		this.izena=izena;
+		this.mota=mota;
+		this.pasahitza=pasahitza;
+		this.irudia=irudia;
 		this.azkenSarrera=null;
 	}
 
@@ -29,6 +39,10 @@ public class Saltzailea {
 	
 	public String getPasahitza() {
 		return pasahitza;
+	}
+
+	public String getIrudia() {
+		return irudia;
 	}
 
 
