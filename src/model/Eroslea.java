@@ -27,5 +27,9 @@ public class Eroslea {
 	public double getDirua() {
 		return dirua;
 	}
+
+	public void setDirua(double dirua) {
+		this.dirua = dirua;
+	}
 	
 }

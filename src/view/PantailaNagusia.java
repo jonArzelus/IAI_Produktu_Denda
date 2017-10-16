@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -84,10 +85,12 @@ public class PantailaNagusia {
 	private HashMap<String, Saltzailea> saltzaileZerrenda = new HashMap<String, Saltzailea>();
 	private HashMap<String, Eroslea> erosleZerrenda = new HashMap<String, Eroslea>();
 	private HashMap<String, Produktua> produktuZerrenda = new HashMap<String, Produktua>();
-	private HashMap<String, Integer> erosketaZerrenda = new HashMap<String, Integer>();
+	private HashMap<String, Produktua> erosketaZerrenda = new HashMap<String, Produktua>();
 	DefaultTableModel dtmAdmin, dtmDenda;
 	String headerAdmin[] = new String[] { "ID", "Izena", "Kopurua", "Prezioa" };
 	String headerDenda[] = new String[] { "ID", "Izena", "Kopurua", "Prezioa" };
+	
+	private boolean ordaintzeko = false;
 
 	// saioaren datuak
 	private Saltzailea saioSaltzailea;
@@ -97,7 +100,7 @@ public class PantailaNagusia {
 	private JTable tblDendaErosketa;
 	private JLabel lblTotala;
 	private JTextField txtDendaTotala;
-	private JLabel lblDendaError;
+	private JLabel lblDendaInfo;
 
 	public PantailaNagusia() {
 		initialize();
@@ -105,6 +108,11 @@ public class PantailaNagusia {
 				new Saltzailea("Giltzak1", "Jon Arzelus Rodriguez", "Saltzaile Arrunta", "1234", "Saltzaile1.png"));
 		saltzaileZerrenda.put("Giltzak2",
 				new Saltzailea("Giltzak2", "Julen Diez Martin", "Saltzaile Arrunta", "1234", "Saltzaile2.png"));
+		// erosle zerrenda
+		erosleZerrenda.put("Erosle1", 
+				new Eroslea("Erosle1", "Iker", "iker123", 100.35));
+		erosleZerrenda.put("Erosle2", 
+				new Eroslea("Erosle2", "Marta", "marta123", 142.14));
 		// produktu zerrenda
 		produktuZerrenda.put("0a00ec5ce2", new Produktua("0a00ec5ce2", "Botoi Beltza", 10.0));
 		produktuZerrenda.put("4d004a650f", new Produktua("4d004a650f", "Baldosa Berdea", 10.0));
@@ -129,35 +137,63 @@ public class PantailaNagusia {
 							lblAdminInfo.setText("Giltza detektatuta, mesedez, sartu pasahitza saioa hasteko");
 						}
 					} else if (tabbedPane.getSelectedIndex() == 1) {
-						lblDendaError.setText("");
-						if (produktuZerrenda.containsKey(e.getTag())) {
-							Produktua temp = produktuZerrenda.get(e.getTag());
-							if (!erosketaZerrenda.containsKey(e.getTag())) {
-								if(temp.getKopurua()>0) {
-									erosketaZerrenda.put(e.getTag(), 1);
-									dtmDenda.addRow(new Object[] {temp.getId(), temp.getIzena(), erosketaZerrenda.get(e.getTag()), temp.getPrezioa()});		
-									txtDendaTotala.setText(""+ (Double.parseDouble(txtDendaTotala.getText())+temp.getPrezioa()));
-								} else {
-									lblDendaError.setText("Ez daukagu produktu honen stock-a");
-								}
-							} else {
-								int zenbat = erosketaZerrenda.get(e.getTag());
-								if(temp.getKopurua()>zenbat){
-									erosketaZerrenda.put(e.getTag(), erosketaZerrenda.get(e.getTag()) + 1);
-									txtDendaTotala.setText(""+ (Double.parseDouble(txtDendaTotala.getText())+temp.getPrezioa()));
-									for(int i=0; i< tblDendaErosketa.getColumnCount(); i++) {
-										if(tblDendaErosketa.getModel().getValueAt(i, 0) == e.getTag()){
-											int kop = (int) tblDendaErosketa.getModel().getValueAt(i, 2);
-											tblDendaErosketa.getModel().setValueAt(kop+1, i, 2);
-											break;
-										}
+						if(ordaintzeko) {
+							if (erosleZerrenda.containsKey(e.getTag())){
+								Eroslea eros = erosleZerrenda.get(e.getTag());
+								String pwd = JOptionPane.showInputDialog("Sartu txartelaren pasahitza");
+								if(pwd.equalsIgnoreCase(eros.getPasahitza())){
+									if(eros.getDirua() >= Double.parseDouble(txtDendaTotala.getText())) {
+										eros.setDirua(eros.getDirua() - Double.parseDouble(txtDendaTotala.getText()));
+										erosleZerrenda.put(e.getTag(), eros);
+										JOptionPane.showMessageDialog(tabbedPane, "Ordainduta");
+										for (String erosle : erosketaZerrenda.keySet())
+											erosketaZerrenda.remove(erosle);
+										tabbedPane.setSelectedIndex(-1);
+										tabbedPane.setSelectedIndex(1);
+										ordaintzeko = false;
+										txtDendaTotala.setText("0");
+									} else {
+										JOptionPane.showMessageDialog(tabbedPane, "Txartela ez dauka hainbeste diru");
 									}
 								} else {
-									lblDendaError.setText("Ez dago produktu honen stock gehiago");
-								}
+									JOptionPane.showMessageDialog(tabbedPane, "Pasahitza ez da zuzena");
+								}							
+							} else {
+								lblDendaInfo.setText("Txartel hau ez da baliagarria, txartel berri bat sartu");
 							}
+							lblDendaInfo.setText("");
 						} else {
-							lblDendaError.setText("Produktu hori ez da gure dendako produktu bat");
+							lblDendaInfo.setText("");
+							if (produktuZerrenda.containsKey(e.getTag())) {
+								Produktua temp = produktuZerrenda.get(e.getTag());
+								if (!erosketaZerrenda.containsKey(e.getTag())) {
+									if(temp.getKopurua()>0) {
+										Produktua prod = new Produktua(e.getTag(), temp.getIzena(), 1, temp.getPrezioa());
+										erosketaZerrenda.put(e.getTag(), prod);	
+										tabbedPane.setSelectedIndex(-1);
+										tabbedPane.setSelectedIndex(1);
+										txtDendaTotala.setText(""+ (Double.parseDouble(txtDendaTotala.getText())+temp.getPrezioa()));
+										lblDendaInfo.setText("Produktua gehituta");
+									} else {
+										lblDendaInfo.setText("Ez daukagu produktu honen stock-a");
+									}
+								} else {
+									int zenbat = erosketaZerrenda.get(e.getTag()).getKopurua();
+									if(temp.getKopurua()>zenbat){
+										Produktua prod = erosketaZerrenda.get(e.getTag());
+										prod.setKopurua(prod.getKopurua()+1);
+										erosketaZerrenda.put(e.getTag(), prod);
+										tabbedPane.setSelectedIndex(-1);
+										tabbedPane.setSelectedIndex(1);
+										txtDendaTotala.setText(""+ (Double.parseDouble(txtDendaTotala.getText())+temp.getPrezioa()));
+										lblDendaInfo.setText("Produktua gehituta");
+									} else {
+										lblDendaInfo.setText("Ez dago produktu honen stock gehiago");
+									}
+								}
+							} else {
+								lblDendaInfo.setText("Produktu hori ez da gure dendako produktu bat");
+							}
 						}
 					} else if (tabbedPane.getSelectedIndex() == 2) { // inbentario
 																		// panela
@@ -186,6 +222,8 @@ public class PantailaNagusia {
 							btnInbGehitu.setEnabled(false);
 						}
 					}
+					
+					
 				}
 			});
 			ch.addTagLostListener(new RFIDTagLostListener() {
@@ -262,6 +300,16 @@ public class PantailaNagusia {
 						txtInbBalioa.setText("");
 						btnInbBalioa.setEnabled(false);
 						btnInbEzabatu.setEnabled(false);
+					}
+					if (tabbedPane.getSelectedIndex() == 1) {
+						for (String k : erosketaZerrenda.keySet()) {
+							Produktua temp= erosketaZerrenda.get(k);
+							dtmDenda.addRow(new Object[] { temp.getId(), temp.getIzena(), temp.getKopurua(),
+									temp.getPrezioa() });
+						}
+					} else {
+						while (dtmDenda.getRowCount() > 0)
+							dtmDenda.removeRow(0);
 					}
 				} catch (Exception ex) {// taula hasieratzean errorea ekiditeko
 					// ex.printStackTrace();
@@ -413,20 +461,44 @@ public class PantailaNagusia {
 		label.setBounds(642, 227, 12, 14);
 		panelDenda.add(label);
 		
-		lblDendaError = new JLabel("");
-		lblDendaError.setForeground(Color.RED);
-		lblDendaError.setEnabled(false);
-		lblDendaError.setBounds(24, 303, 366, 14);
-		panelDenda.add(lblDendaError);
+		lblDendaInfo = new JLabel("");
+		lblDendaInfo.setForeground(Color.RED);
+		lblDendaInfo.setEnabled(false);
+		lblDendaInfo.setBounds(24, 303, 366, 14);
+		panelDenda.add(lblDendaInfo);
 		
 		JButton btnOrdaindu = new JButton("Ordaindu");
 		btnOrdaindu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				if(Double.parseDouble(txtDendaTotala.getText())>0){
+					lblDendaInfo.setText("Pasatu zure txartela ordaintzeko");
+					ordaintzeko = true;
+				}
 				
 			}
 		});
 		btnOrdaindu.setBounds(546, 269, 89, 23);
 		panelDenda.add(btnOrdaindu);
+		
+		JButton btnDendaEzabatuProduktua = new JButton("Ezabatu Produktua");
+		btnDendaEzabatuProduktua.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					String prodIz = tblDendaErosketa.getModel().getValueAt(tblDendaErosketa.getSelectedRow(), 0).toString();
+					Produktua prod = erosketaZerrenda.get(prodIz);
+					txtDendaTotala.setText("" + (Double.parseDouble(txtDendaTotala.getText()) - (prod.getPrezioa() * prod.getKopurua())));
+					erosketaZerrenda.remove(prodIz);
+					tabbedPane.setSelectedIndex(-1);
+					tabbedPane.setSelectedIndex(1);
+					lblDendaInfo.setText("Produktua modu egokian ezabatu da");
+				} catch (Exception ex) {
+					lblDendaInfo.setText(
+							"Ezin izan da produktua ezabatu. Mesedez, kontaktatu administrariarekin eta eman 0xheh211221h errore kodea ;)");
+				}
+			}
+		});
+		btnDendaEzabatuProduktua.setBounds(302, 223, 134, 23);
+		panelDenda.add(btnDendaEzabatuProduktua);
 
 		panelInbentarioa = new JPanel();
 		tabbedPane.addTab("Inbentarioa", null, panelInbentarioa, null);
