@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class Saltzailea {
 	
-	String id, izena, mota, pasahitza, irudia;
+	String id, izena, mota, pasahitza, irudia; //mota aldagaia jarri da, aurrerago "administratzailea" mota sortzeko asmoz
 	LocalDateTime azkenSarrera;
 	
 	public Saltzailea(String id, String izena, String mota, String pasahitza) {

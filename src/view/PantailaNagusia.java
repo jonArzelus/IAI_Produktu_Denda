@@ -46,6 +46,7 @@ import java.awt.event.MouseEvent;
 import java.awt.Font;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
+import java.awt.SystemColor;
 
 public class PantailaNagusia {
 
@@ -68,12 +69,19 @@ public class PantailaNagusia {
 	JLabel lblAdminEr2;
 	JLabel lblAdminId;
 	JLabel lblInbInfo;
+	JLabel lblDendaKargaInfo;
+	JLabel lblDendaTxartela;
+	JLabel lblDendaDirukop;
+	JLabel lblEroslearenTxartelarenInformazioa;
+	JLabel lblEskuragarria;
+	JLabel lblTxartelaid;
 
 	JButton btnAdminAmaitu;
 	JButton btnAdminHasi;
 	JButton btnInbEzabatu;
 	JButton btnInbBalioa;
 	JButton btnInbGehitu;
+	JButton btnDendaKargatu;
 
 	// panelak
 	JTabbedPane tabbedPane;
@@ -89,11 +97,11 @@ public class PantailaNagusia {
 	DefaultTableModel dtmAdmin, dtmDenda;
 	String headerAdmin[] = new String[] { "ID", "Izena", "Kopurua", "Prezioa" };
 	String headerDenda[] = new String[] { "ID", "Izena", "Kopurua", "Prezioa" };
-	
+
 	private boolean ordaintzeko = false;
 
 	// saioaren datuak
-	private Saltzailea saioSaltzailea;
+	private Object saioSaltzailea;
 
 	// txartel irakurtzailea
 	RFID ch;
@@ -101,6 +109,7 @@ public class PantailaNagusia {
 	private JLabel lblTotala;
 	private JTextField txtDendaTotala;
 	private JLabel lblDendaInfo;
+	private JTextField txtDendaDirua;
 
 	public PantailaNagusia() {
 		initialize();
@@ -109,19 +118,17 @@ public class PantailaNagusia {
 		saltzaileZerrenda.put("Giltzak2",
 				new Saltzailea("Giltzak2", "Julen Diez Martin", "Saltzaile Arrunta", "1234", "Saltzaile2.png"));
 		// erosle zerrenda
-		erosleZerrenda.put("Erosle1", 
-				new Eroslea("Erosle1", "Iker", "iker123", 100.35));
-		erosleZerrenda.put("Erosle2", 
-				new Eroslea("Erosle2", "Marta", "marta123", 142.14));
+		erosleZerrenda.put("Erosle1", new Eroslea("Erosle1", "Iker", "iker123", 100.35));
+		erosleZerrenda.put("Erosle2", new Eroslea("Erosle2", "Marta", "marta123", 142.14));
 		// produktu zerrenda
-		produktuZerrenda.put("0a00ec5ce2", new Produktua("0a00ec5ce2", "Botoi Beltza", 10.0));
-		produktuZerrenda.put("4d004a650f", new Produktua("4d004a650f", "Baldosa Berdea", 10.0));
-		produktuZerrenda.put("4d004b17c3", new Produktua("4d004b17c3", "Txakurrarentzako Kolgantea", 10.0));
-		produktuZerrenda.put("0f000a7398", new Produktua("0f000a7398", "Diska Zuria - Txikia", 10.0));
-		produktuZerrenda.put("4300d02f4a", new Produktua("4300d02f4a", "Iltze Beltza", 10.0));
-		produktuZerrenda.put("0f0001b130", new Produktua("0f0001b130", "Diska Zuria - Handia", 10.0));
-		produktuZerrenda.put("4800eef486", new Produktua("4800eef486", "Txorien Kontrolerako Aparatua", 10.0));
-		produktuZerrenda.put("3f0060b6b6", new Produktua("3f0060b6b6", "Roska Tapoi Beltza", 10.0));
+		produktuZerrenda.put("0a00ec5ce2", new Produktua("0a00ec5ce2", "Botoi Beltza", 5, 10.0));
+		produktuZerrenda.put("4d004a650f", new Produktua("4d004a650f", "Baldosa Berdea", 5, 10.0));
+		produktuZerrenda.put("4d004b17c3", new Produktua("4d004b17c3", "Txakurrarentzako Kolgantea", 5, 10.0));
+		produktuZerrenda.put("0f000a7398", new Produktua("0f000a7398", "Diska Zuria - Txikia", 5, 10.0));
+		produktuZerrenda.put("4300d02f4a", new Produktua("4300d02f4a", "Iltze Beltza", 5, 10.0));
+		produktuZerrenda.put("0f0001b130", new Produktua("0f0001b130", "Diska Zuria - Handia", 5, 10.0));
+		produktuZerrenda.put("4800eef486", new Produktua("4800eef486", "Txorien Kontrolerako Aparatua", 5, 10.0));
+		produktuZerrenda.put("3f0060b6b6", new Produktua("3f0060b6b6", "Roska Tapoi Beltza", 5, 10.0));
 		saioSaltzailea = null;
 		try {
 			ch = new RFID();
@@ -137,12 +144,12 @@ public class PantailaNagusia {
 							lblAdminInfo.setText("Giltza detektatuta, mesedez, sartu pasahitza saioa hasteko");
 						}
 					} else if (tabbedPane.getSelectedIndex() == 1) {
-						if(ordaintzeko) {
-							if (erosleZerrenda.containsKey(e.getTag())){
+						if (ordaintzeko) {
+							if (erosleZerrenda.containsKey(e.getTag())) {
 								Eroslea eros = erosleZerrenda.get(e.getTag());
 								String pwd = JOptionPane.showInputDialog("Sartu txartelaren pasahitza");
-								if(pwd.equalsIgnoreCase(eros.getPasahitza())){
-									if(eros.getDirua() >= Double.parseDouble(txtDendaTotala.getText())) {
+								if (pwd.equalsIgnoreCase(eros.getPasahitza())) {
+									if (eros.getDirua() >= Double.parseDouble(txtDendaTotala.getText())) {
 										eros.setDirua(eros.getDirua() - Double.parseDouble(txtDendaTotala.getText()));
 										erosleZerrenda.put(e.getTag(), eros);
 										JOptionPane.showMessageDialog(tabbedPane, "Ordainduta");
@@ -152,12 +159,13 @@ public class PantailaNagusia {
 										tabbedPane.setSelectedIndex(1);
 										ordaintzeko = false;
 										txtDendaTotala.setText("0");
+										lblDendaDirukop.setText(String.valueOf(((Eroslea)saioSaltzailea).getDirua())+"€");
 									} else {
-										JOptionPane.showMessageDialog(tabbedPane, "Txartela ez dauka hainbeste diru");
+										JOptionPane.showMessageDialog(tabbedPane, "Txartelak ez dauka hainbeste diru");
 									}
 								} else {
 									JOptionPane.showMessageDialog(tabbedPane, "Pasahitza ez da zuzena");
-								}							
+								}
 							} else {
 								lblDendaInfo.setText("Txartel hau ez da baliagarria, txartel berri bat sartu");
 							}
@@ -167,25 +175,28 @@ public class PantailaNagusia {
 							if (produktuZerrenda.containsKey(e.getTag())) {
 								Produktua temp = produktuZerrenda.get(e.getTag());
 								if (!erosketaZerrenda.containsKey(e.getTag())) {
-									if(temp.getKopurua()>0) {
-										Produktua prod = new Produktua(e.getTag(), temp.getIzena(), 1, temp.getPrezioa());
-										erosketaZerrenda.put(e.getTag(), prod);	
+									if (temp.getKopurua() > 0) {
+										Produktua prod = new Produktua(e.getTag(), temp.getIzena(), 1,
+												temp.getPrezioa());
+										erosketaZerrenda.put(e.getTag(), prod);
 										tabbedPane.setSelectedIndex(-1);
 										tabbedPane.setSelectedIndex(1);
-										txtDendaTotala.setText(""+ (Double.parseDouble(txtDendaTotala.getText())+temp.getPrezioa()));
+										txtDendaTotala.setText(""
+												+ (Double.parseDouble(txtDendaTotala.getText()) + temp.getPrezioa()));
 										lblDendaInfo.setText("Produktua gehituta");
 									} else {
 										lblDendaInfo.setText("Ez daukagu produktu honen stock-a");
 									}
 								} else {
 									int zenbat = erosketaZerrenda.get(e.getTag()).getKopurua();
-									if(temp.getKopurua()>zenbat){
+									if (temp.getKopurua() > zenbat) {
 										Produktua prod = erosketaZerrenda.get(e.getTag());
-										prod.setKopurua(prod.getKopurua()+1);
+										prod.setKopurua(prod.getKopurua() + 1);
 										erosketaZerrenda.put(e.getTag(), prod);
 										tabbedPane.setSelectedIndex(-1);
 										tabbedPane.setSelectedIndex(1);
-										txtDendaTotala.setText(""+ (Double.parseDouble(txtDendaTotala.getText())+temp.getPrezioa()));
+										txtDendaTotala.setText(""
+												+ (Double.parseDouble(txtDendaTotala.getText()) + temp.getPrezioa()));
 										lblDendaInfo.setText("Produktua gehituta");
 									} else {
 										lblDendaInfo.setText("Ez dago produktu honen stock gehiago");
@@ -222,8 +233,7 @@ public class PantailaNagusia {
 							btnInbGehitu.setEnabled(false);
 						}
 					}
-					
-					
+
 				}
 			});
 			ch.addTagLostListener(new RFIDTagLostListener() {
@@ -374,11 +384,18 @@ public class PantailaNagusia {
 		btnAdminHasi.addActionListener(new ActionListener() {
 			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent arg0) {
-				Saltzailea temp;
+				//Saltzailea temp;
 				if (saltzaileZerrenda.get(txtAdminErab.getText()) != null) {
 					if (saltzaileZerrenda.get(txtAdminErab.getText().toString()).getPasahitza()
 							.equals(pwdAdminPwd.getText().toString())) {
 						saioaHasi();
+					} else {
+						lblAdminEr1.setText("");
+						lblAdminEr2.setText("Pasahitza okerra, saiatu berriro");
+					}
+				} else if(erosleZerrenda.get(txtAdminErab.getText())!=null) {
+					if (erosleZerrenda.get(txtAdminErab.getText().toString()).getPasahitza().equals(pwdAdminPwd.getText().toString())) {
+						saioaHasiErosle();
 					} else {
 						lblAdminEr1.setText("");
 						lblAdminEr2.setText("Pasahitza okerra, saiatu berriro");
@@ -430,7 +447,7 @@ public class PantailaNagusia {
 		panelDenda.setLayout(null);
 
 		JLabel lblDendaArgazkia = new JLabel("");
-		ImageIcon ii = new ImageIcon(this.getClass().getResource("/view/makina.jpg"));
+		ImageIcon ii = new ImageIcon(this.getClass().getResource("/view/makina.png"));
 		lblDendaArgazkia.setIcon(new ImageIcon(ii.getImage().getScaledInstance(267, 169, Image.SCALE_SMOOTH)));
 		lblDendaArgazkia.setVerticalAlignment(SwingConstants.TOP);
 		lblDendaArgazkia.setHorizontalAlignment(SwingConstants.CENTER);
@@ -469,7 +486,8 @@ public class PantailaNagusia {
 		
 		JButton btnOrdaindu = new JButton("Ordaindu");
 		btnOrdaindu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+
+	public void actionPerformed(ActionEvent arg0) {
 				if(Double.parseDouble(txtDendaTotala.getText())>0){
 					lblDendaInfo.setText("Pasatu zure txartela ordaintzeko");
 					ordaintzeko = true;
@@ -497,8 +515,55 @@ public class PantailaNagusia {
 				}
 			}
 		});
-		btnDendaEzabatuProduktua.setBounds(302, 223, 134, 23);
+		btnDendaEzabatuProduktua.setBounds(302, 223, 177, 23);
 		panelDenda.add(btnDendaEzabatuProduktua);
+		
+		lblEroslearenTxartelarenInformazioa = new JLabel("Eroslearen txartelaren informazioa");
+		lblEroslearenTxartelarenInformazioa.setBounds(25, 200, 267, 14);
+		panelDenda.add(lblEroslearenTxartelarenInformazioa);
+		
+		lblTxartelaid = new JLabel("Txartela (ID):");
+		lblTxartelaid.setBounds(25, 227, 89, 14);
+		panelDenda.add(lblTxartelaid);
+		
+		lblDendaTxartela = new JLabel("id");
+		lblDendaTxartela.setBounds(113, 227, 86, 14);
+		panelDenda.add(lblDendaTxartela);
+		
+		lblEskuragarria = new JLabel("Eskuragarria:");
+		lblEskuragarria.setBounds(25, 252, 89, 14);
+		panelDenda.add(lblEskuragarria);
+		
+		lblDendaDirukop = new JLabel("x.x\u20AC");
+		lblDendaDirukop.setBounds(113, 252, 83, 14);
+		panelDenda.add(lblDendaDirukop);
+		
+		btnDendaKargatu = new JButton("Sartu");
+		btnDendaKargatu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					((Eroslea)saioSaltzailea).setDirua(((Eroslea)saioSaltzailea).getDirua()+Double.parseDouble(txtDendaDirua.getText()));
+					erosleZerrenda.put(((Eroslea)saioSaltzailea).getId(),(Eroslea)saioSaltzailea);
+					lblDendaDirukop.setText(String.valueOf(((Eroslea)saioSaltzailea).getDirua())+"€");
+					lblDendaKargaInfo.setText("Adierazitako diru kopurua ("+txtDendaDirua.getText()+"€) kargatu da");
+					txtDendaDirua.setText("");
+				} catch(Exception e) {
+					lblDendaKargaInfo.setText("Adierazitako kopurua ez da baliozkoa, saiatu berriro");
+				}
+			}
+		});
+		btnDendaKargatu.setBounds(206, 248, 86, 23);
+		panelDenda.add(btnDendaKargatu);
+		
+		txtDendaDirua = new JTextField();
+		txtDendaDirua.setBounds(206, 224, 86, 20);
+		panelDenda.add(txtDendaDirua);
+		txtDendaDirua.setColumns(10);
+		
+		lblDendaKargaInfo = new JLabel("info: sartu botoiak adierazitako dirua kargatuko du txartelean");
+		lblDendaKargaInfo.setForeground(new Color(255, 20, 147));
+		lblDendaKargaInfo.setBounds(25, 278, 511, 14);
+		panelDenda.add(lblDendaKargaInfo);
 
 		panelInbentarioa = new JPanel();
 		tabbedPane.addTab("Inbentarioa", null, panelInbentarioa, null);
@@ -668,25 +733,22 @@ public class PantailaNagusia {
 		frmPhidgetDenda.setVisible(b);
 	}
 
-	public void erakutsiLogin() {
+	/*
+	 * public void erakutsiLogin() {
+	 * 
+	 * }
+	 */
 
-	}
-
-	public void saioaHasi() {
+	public void saioaHasi() { //saltzailearen logina
 		saioSaltzailea = saltzaileZerrenda.get(txtAdminErab.getText());
-		ImageIcon ii = new ImageIcon(this.getClass().getResource(saioSaltzailea.getIrudia())); // pistaren
-																								// irudia
-																								// label
-																								// batean
-																								// jarri,
-																								// fondo
-																								// modura
+		// fondoa
+		ImageIcon ii = new ImageIcon(this.getClass().getResource(((Saltzailea) saioSaltzailea).getIrudia()));
 		lblAdminArgazkia.setIcon(ii);
-		lblAdminId.setText(saioSaltzailea.getId());
-		lblAdminIzena.setText(saioSaltzailea.getIzena());
-		lblAdminMota.setText(saioSaltzailea.getMota());
-		if (saioSaltzailea.getAzkenSarrera() != null) {
-			lblAdminSarrera.setText(saioSaltzailea.getAzkenSarrera().toString());
+		lblAdminId.setText(((Saltzailea) saioSaltzailea).getId());
+		lblAdminIzena.setText(((Saltzailea) saioSaltzailea).getIzena());
+		lblAdminMota.setText(((Saltzailea) saioSaltzailea).getMota());
+		if (((Saltzailea) saioSaltzailea).getAzkenSarrera() != null) {
+			lblAdminSarrera.setText(((Saltzailea) saioSaltzailea).getAzkenSarrera().toString());
 		} else {
 			lblAdminSarrera.setText(LocalDateTime.now().toString());
 		}
@@ -700,6 +762,53 @@ public class PantailaNagusia {
 		tabbedPane.setEnabled(true);
 		// panelDenda.setEnabled(true);
 		// panelInbentarioa.setEnabled(true);
+		
+		//eroslearen asuntuak ezkutatu
+		lblDendaDirukop.setVisible(false);
+		lblDendaKargaInfo.setVisible(false);
+		lblDendaTxartela.setVisible(false);
+		lblEskuragarria.setVisible(false);
+		lblTxartelaid.setVisible(false);
+		txtDendaDirua.setVisible(false);
+		btnDendaKargatu.setVisible(false);
+		lblEroslearenTxartelarenInformazioa.setVisible(false);
+		
+	}
+	
+	public void saioaHasiErosle() {
+		saioSaltzailea = erosleZerrenda.get(txtAdminErab.getText());
+		// fondoa
+		ImageIcon ii = new ImageIcon();
+		lblAdminArgazkia.setIcon(ii);
+		lblAdminId.setText(((Eroslea) saioSaltzailea).getId());
+		lblAdminIzena.setText(((Eroslea) saioSaltzailea).getIzena());
+		lblAdminMota.setText("Erosle arrunta"); //erosle premiun egiteko aukera?
+		lblAdminSarrera.setText(LocalDateTime.now().toString());
+		btnAdminHasi.setEnabled(false);
+		txtAdminErab.setEnabled(false);
+		pwdAdminPwd.setEnabled(false);
+		lblAdminInfo.setText("Saioa hasita EROSLE bezala. Ez ahaztu saioa amaitzen joan aurretikan");
+		lblAdminEr1.setText("");
+		lblAdminEr2.setText("");
+		btnAdminAmaitu.setEnabled(true);
+		tabbedPane.setEnabled(true);
+		tabbedPane.setEnabledAt(0, true);
+		tabbedPane.setEnabledAt(1, true);
+		tabbedPane.setEnabledAt(2, false);
+		
+		//eroslearen asuntuak erakutsi
+				lblDendaDirukop.setVisible(true);
+				lblDendaDirukop.setText(String.valueOf(((Eroslea)saioSaltzailea).getDirua())+"€");
+				lblDendaKargaInfo.setVisible(true);
+				lblDendaKargaInfo.setText("info: sartu botoiak adierazitako dirua kargatuko du txartelean");
+				lblDendaTxartela.setVisible(true);
+				lblDendaTxartela.setText(((Eroslea)saioSaltzailea).getId());
+				lblEskuragarria.setVisible(true);
+				lblTxartelaid.setVisible(true);
+				txtDendaDirua.setVisible(true);
+				txtDendaDirua.setText("");
+				btnDendaKargatu.setVisible(true);
+				lblEroslearenTxartelarenInformazioa.setVisible(true);
 	}
 
 	public void saioaAmaitu() {

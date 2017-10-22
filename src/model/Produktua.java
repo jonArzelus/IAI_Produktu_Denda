@@ -10,6 +10,7 @@ public class Produktua {
 		id=ident;
 		izena=izen;
 		prezioa=prez;
+		kopurua=0;
 	}
 	
 	public Produktua(String ident, String izen, int kop, double prez) {
